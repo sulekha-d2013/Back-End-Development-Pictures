@@ -35,7 +35,8 @@ def count():
 ######################################################################
 @app.route("/picture", methods=["GET"])
 def get_pictures():
-    pass
+    if data:
+        return jsonify(data), 200
 
 ######################################################################
 # GET A PICTURE
@@ -44,15 +45,36 @@ def get_pictures():
 
 @app.route("/picture/<int:id>", methods=["GET"])
 def get_picture_by_id(id):
-    pass
+    for i in data:
+        if i["id"] == id:
+            return jsonify(i), 200
 
+    return {}, 404
 
 ######################################################################
 # CREATE A PICTURE
 ######################################################################
 @app.route("/picture", methods=["POST"])
 def create_picture():
-    pass
+    new_pic = request.json
+    if not new_pic:
+        return {"message": "Invalid input parameter"}, 422
+
+    F =None;
+    for i in data:
+        if i["id"] == new_pic["id"]:
+            F = 1;
+            break;
+
+    if F == 1:
+        return  {'Message':f"picture with id {new_pic['id']} already present"}, 302
+
+    try:
+        data.append(new_pic)
+    except NameError:
+        return {"message": "data not defined"}, 500
+    
+    return dict(new_pic), 201
 
 ######################################################################
 # UPDATE A PICTURE
@@ -61,11 +83,32 @@ def create_picture():
 
 @app.route("/picture/<int:id>", methods=["PUT"])
 def update_picture(id):
-    pass
+    F=None;
+    new_pic = request.json
+    for j, i in enumerate(data):
+        if i["id"] == id:
+            F = j;
+            break;
+
+    if F is not None:
+        data[F] = new_pic;
+        return jsonify(data[F]), 200
+
+    return {}, 404
 
 ######################################################################
 # DELETE A PICTURE
 ######################################################################
 @app.route("/picture/<int:id>", methods=["DELETE"])
 def delete_picture(id):
-    pass
+    F = None;
+    for i in data:
+         if i["id"] == id:
+            F = i;
+            break;
+
+    if F is not None:
+        data.remove(F)
+        return {}, 204
+
+    return {"message": "person not found"}, 404
